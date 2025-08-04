@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><b>HK ROYALS</b></title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-image: url('bg.jpeg');
+      background-size: cover;
+      background-attachment: fixed;
+      animation: moveBg 60s linear infinite;
+    }
+
+    @keyframes moveBg {
+      0% { background-position: 0 0; }
+      100% { background-position: 1000px 0; }
+    }
+
+    h1 {
+      text-align: center;
+      color: white;
+      margin-top: 20px;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 30px;
+      padding: 40px;
+    }
+
+    .product {
+      border: 3px solid #fff;
+      padding: 15px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 15px;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .product img {
+      width: 200px;
+      height: auto;
+      cursor: grab;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .product img:hover,
+    .product img.active {
+      transform: scale(1.1);
+      box-shadow: 0 0 25px yellow;
+    }
+
+    #map {
+      height: 350px;
+      width: 90%;
+      margin: 30px auto;
+      border: 3px solid white;
+      border-radius: 10px;
+    }
+
+    .media-section {
+      text-align: center;
+      margin-top: 30px;
+      color: white;
+    }
+
+    video, audio {
+      margin: 10px;
+    }
+
+    #cart {
+      margin: 30px auto;
+      width: 90%;
+      min-height: 100px;
+      background: rgba(255, 255, 255, 0.3);
+      border: 3px dashed white;
+      border-radius: 15px;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1><b>HK ROYALS</b></h1>
+
+  <div class="container">
+    <div class="product">
+      <img src="gt650.jpeg" alt="GT 650" onclick="highlight(this)" draggable="true" ondragstart="drag(event)" id="gt">
+      <p><strong>GT 650</strong></p>
+    </div>
+    <div class="product">
+      <img src="interceptor.jpeg" alt="Interceptor" onclick="highlight(this)" draggable="true" ondragstart="drag(event)" id="int">
+      <p><strong>Interceptor</strong></p>
+    </div>
+  </div>
+
+  <div id="cart" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <strong>Drop your selected products here</strong>
+  </div>
+
+  <div id="map"></div>
+
+  <div class="media-section">
+    <h2>Product Demo</h2>
+    <video width="320" height="240" controls>
+      <source src="re.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <br>
+    <audio controls>
+      <source src="re.mp3" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    // Map setup
+    const map = L.map('map').setView([11.0168, 76.9558], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+    }).addTo(map);
+
+    navigator.geolocation.getCurrentPosition(function(position) {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      map.setView([lat, lon], 13);
+      L.marker([lat, lon]).addTo(map).bindPopup("You are here!").openPopup();
+    });
+
+    let clickMarker;
+    map.on('click', function(e) {
+      if (clickMarker) map.removeLayer(clickMarker);
+      const lat = e.latlng.lat.toFixed(4);
+      const lon = e.latlng.lng.toFixed(4);
+      clickMarker = L.marker([lat, lon]).addTo(map)
+        .bindPopup("Clicked Location<br>Lat: " + lat + "<br>Lon: " + lon).openPopup();
+    });
+
+    // Highlight product
+    function highlight(img) {
+      document.querySelectorAll('.product img').forEach(el => el.classList.remove('active'));
+      img.classList.add('active');
+    }
+
+    // Drag and drop
+    function allowDrop(ev) {
+      ev.preventDefault();
+    }
+
+    function drag(ev) {
+      ev.dataTransfer.setData("text", ev.target.id);
+    }
+
+    function drop(ev) {
+      ev.preventDefault();
+      var data = ev.dataTransfer.getData("text");
+      var item = document.getElementById(data).cloneNode(true);
+      item.removeAttribute('id'); // prevent ID conflicts
+      ev.target.appendChild(item);
+    }
+  </script>
+</body>
+</html>
